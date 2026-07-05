@@ -1,0 +1,13 @@
+{
+  "db": {
+    "host": "localhost",
+    "name": "osp_tracker",
+    "user": "db_username",
+    "pass": "db_password"
+  },
+  "jwt": {
+    "secret": "REPLACE_WITH_STRONG_RANDOM_SECRET_MIN_32_CHARS_HERE",
+    "accessExpiry": 28800
+  },
+  "centre_number": "54221"
+}

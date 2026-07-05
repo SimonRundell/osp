@@ -1,0 +1,13 @@
+{
+  "name": "exeter-college/osptracker-api",
+  "description": "OSP Hours Tracker PHP API",
+  "require": {
+    "firebase/php-jwt": "^6.0"
+  },
+  "config": {
+    "vendor-dir": "vendor",
+    "audit": {
+      "block-insecure": false
+    }
+  }
+}

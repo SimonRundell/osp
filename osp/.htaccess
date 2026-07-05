@@ -1,0 +1,11 @@
+Options -Indexes
+
+# Pass Authorization header through to PHP (Apache strips it by default)
+RewriteEngine On
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Deny direct web access to configuration and log files
+<FilesMatch "\.(json|log)$">
+  Require all denied
+</FilesMatch>

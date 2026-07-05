@@ -1,0 +1,21 @@
+# Build output
+bin/
+obj/
+
+# Visual Studio IDE state
+.vs/
+
+# User-specific files
+*.user
+*.suo
+*.userprefs
+osp/.config.json
+osp/live.config.json
+osp/server.log
+
+# Rider
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store

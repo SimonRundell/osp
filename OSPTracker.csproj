@@ -1,0 +1,181 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>OSPTracker</RootNamespace>
+    <AssemblyName>OSPTracker</AssemblyName>
+    <LangVersion>12.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <StartupObject>OSPTracker.Program</StartupObject>
+    <ApplicationIcon>osptracker.ico</ApplicationIcon>
+    <Version>0.0.0.2</Version>
+    <AssemblyVersion>0.0.0.2</AssemblyVersion>
+    <FileVersion>0.0.0.2</FileVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="ClosedXML" Version="0.104.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <!-- WinForms designer metadata: SubType enables "View Designer"; DependentUpon nests .Designer.cs under its parent -->
+  <ItemGroup>
+    <!-- Forms -->
+    <Compile Update="Forms\LoginForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\LoginForm.Designer.cs">
+      <DependentUpon>LoginForm.cs</DependentUpon>
+    </Compile>
+
+    <Compile Update="Forms\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+
+    <Compile Update="Forms\ChangePasswordForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\ChangePasswordForm.Designer.cs">
+      <DependentUpon>ChangePasswordForm.cs</DependentUpon>
+    </Compile>
+
+    <Compile Update="Forms\ProjectDetailForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\ProjectDetailForm.Designer.cs">
+      <DependentUpon>ProjectDetailForm.cs</DependentUpon>
+    </Compile>
+
+    <Compile Update="Forms\SessionListForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\SessionListForm.Designer.cs">
+      <DependentUpon>SessionListForm.cs</DependentUpon>
+    </Compile>
+
+    <Compile Update="Forms\AttendanceEntryForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\AttendanceEntryForm.Designer.cs">
+      <DependentUpon>AttendanceEntryForm.cs</DependentUpon>
+    </Compile>
+
+    <!-- Dashboard -->
+    <Compile Update="Forms\Dashboard\DashboardPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Forms\Dashboard\DashboardPanel.Designer.cs">
+      <DependentUpon>DashboardPanel.cs</DependentUpon>
+    </Compile>
+
+    <!-- Projects browse panel (main tab) -->
+    <Compile Update="Forms\ProjectsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Forms\ProjectsPanel.Designer.cs">
+      <DependentUpon>ProjectsPanel.cs</DependentUpon>
+    </Compile>
+
+    <!-- Dialogs -->
+    <Compile Update="Dialogs\SessionFormDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Dialogs\SessionFormDialog.Designer.cs">
+      <DependentUpon>SessionFormDialog.cs</DependentUpon>
+    </Compile>
+
+    <Compile Update="Dialogs\EnrolStudentDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Dialogs\EnrolStudentDialog.Designer.cs">
+      <DependentUpon>EnrolStudentDialog.cs</DependentUpon>
+    </Compile>
+
+    <!-- Admin panels (UserControl subclasses) -->
+    <Compile Update="Admin\AdminPanelBase.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Admin\AdminPanelBase.Designer.cs">
+      <DependentUpon>AdminPanelBase.cs</DependentUpon>
+    </Compile>
+
+    <Compile Update="Admin\AdminTabPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Admin\AdminTabPanel.Designer.cs">
+      <DependentUpon>AdminTabPanel.cs</DependentUpon>
+    </Compile>
+
+    <Compile Update="Admin\StaffPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Admin\StaffPanel.Designer.cs">
+      <DependentUpon>StaffPanel.cs</DependentUpon>
+    </Compile>
+
+    <Compile Update="Admin\StudentsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Admin\StudentsPanel.Designer.cs">
+      <DependentUpon>StudentsPanel.cs</DependentUpon>
+    </Compile>
+
+    <Compile Update="Admin\ProjectAdminPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Admin\ProjectAdminPanel.Designer.cs">
+      <DependentUpon>ProjectAdminPanel.cs</DependentUpon>
+    </Compile>
+
+    <!-- Admin edit dialogs -->
+    <Compile Update="Admin\StaffEditDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Admin\StaffEditDialog.Designer.cs">
+      <DependentUpon>StaffEditDialog.cs</DependentUpon>
+    </Compile>
+
+    <Compile Update="Admin\StudentEditDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Admin\StudentEditDialog.Designer.cs">
+      <DependentUpon>StudentEditDialog.cs</DependentUpon>
+    </Compile>
+
+    <Compile Update="Admin\StudentImportDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Admin\StudentImportDialog.Designer.cs">
+      <DependentUpon>StudentImportDialog.cs</DependentUpon>
+    </Compile>
+
+    <Compile Update="Admin\ProjectEditDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Admin\ProjectEditDialog.Designer.cs">
+      <DependentUpon>ProjectEditDialog.cs</DependentUpon>
+    </Compile>
+
+    <!-- Reports -->
+    <Compile Update="Reports\ReportForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Reports\ReportForm.Designer.cs">
+      <DependentUpon>ReportForm.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+</Project>
