@@ -25,6 +25,7 @@ namespace OSPTracker.Forms
         private Label _lblTitle, _lblFooter, _lblError;
         private Button _btnAdd, _btnRefresh;
         private DataGridView _grid;
+        private DataGridView _studentsGrid;
         private bool IsAdmin => ApiService.Instance.CurrentStaff?.IsAdmin == true;
 
         public SessionListForm(int projectId)
@@ -83,10 +84,57 @@ namespace OSPTracker.Forms
             }
             _grid.CellClick += Grid_CellClick;
 
-            Controls.Add(_grid);
+            var studentsHeader = new Label
+            {
+                Dock = DockStyle.Top, Height = 24, Padding = new Padding(4, 4, 0, 0),
+                Font = new Font(Theme.FontFamily, 9f, FontStyle.Bold), ForeColor = Theme.Primary,
+                Text = "Enrolled Students — Time Used",
+            };
+
+            _studentsGrid = new DataGridView
+            {
+                Dock = DockStyle.Fill, AllowUserToAddRows = false, AllowUserToDeleteRows = false,
+                RowHeadersVisible = false, ReadOnly = true,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect, MultiSelect = false,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                BackgroundColor = Color.White,
+                ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
+                {
+                    BackColor = Theme.Primary, ForeColor = Color.White,
+                    Font = new Font(Theme.FontFamily, 8.5f, FontStyle.Bold),
+                },
+                DefaultCellStyle = new DataGridViewCellStyle { Font = new Font(Theme.FontFamily, 9f) },
+                RowTemplate = { Height = 22 },
+            };
+            _studentsGrid.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Candidate #", Name = "cand",      FillWeight = 1.2f });
+            _studentsGrid.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Surname",     Name = "surname",   FillWeight = 1f });
+            _studentsGrid.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "First Name",  Name = "first",     FillWeight = 1f });
+            _studentsGrid.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Extension",   Name = "ext",       FillWeight = 0.8f });
+            _studentsGrid.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Allowed",      Name = "allowed",   FillWeight = 0.8f });
+            _studentsGrid.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Used",         Name = "used",      FillWeight = 0.8f });
+            _studentsGrid.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Remaining",    Name = "remaining", FillWeight = 0.8f });
+            _studentsGrid.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "% Used",       Name = "pct",       FillWeight = 1f });
+            _studentsGrid.CellPainting += (s, e) =>
+            {
+                if (e.RowIndex >= 0 && e.Value != null && _studentsGrid.Columns[e.ColumnIndex].Name == "pct")
+                    ProgressCellRenderer.Paint(e, Convert.ToInt32(e.Value));
+            };
+
+            var split = new SplitContainer
+            {
+                Dock = DockStyle.Fill, Orientation = Orientation.Horizontal,
+                Panel1MinSize = 120, Panel2MinSize = 100,
+            };
+            split.Panel1.Controls.Add(_grid);
+            split.Panel2.Controls.Add(_studentsGrid);
+            split.Panel2.Controls.Add(studentsHeader);
+
+            Controls.Add(split);
             Controls.Add(_lblFooter);
             Controls.Add(_lblError);
             Controls.Add(header);
+
+            Shown += (s, e) => { try { split.SplitterDistance = Math.Max(split.Panel1MinSize, split.Height - 190); } catch { } };
         }
 
         private async void Grid_CellClick(object sender, DataGridViewCellEventArgs e)
@@ -167,6 +215,7 @@ namespace OSPTracker.Forms
             {
                 var projResp = await ApiService.Instance.GetAsync<SingleResponse<ProjectDto>>("/projects/show.php", $"id={_projectId}");
                 var sessResp = await ApiService.Instance.GetAsync<ListResponse<SessionDto>>("/sessions/index.php", $"project_id={_projectId}");
+                var studResp = await ApiService.Instance.GetAsync<ListResponse<ProjectStudentDto>>("/students/for-project.php", $"project_id={_projectId}");
 
                 _project = projResp?.Data;
                 Text = $"Sessions — {_project?.Name}";
@@ -190,6 +239,16 @@ namespace OSPTracker.Forms
                 int remaining         = totalProjectMins - (int)Math.Round(totalScheduled);
                 _lblFooter.Text = $"Scheduled time: {Math.Round(totalScheduled)} mins        Remaining unscheduled time: {remaining} mins";
                 _lblFooter.ForeColor = remaining < 0 ? Theme.Danger : Color.Black;
+
+                _studentsGrid.Rows.Clear();
+                foreach (var ps in studResp?.Data ?? new List<ProjectStudentDto>())
+                {
+                    int idx = _studentsGrid.Rows.Add(
+                        ps.CandidateNumber, ps.Surname, ps.FirstName,
+                        ps.TimeExtensionPercent > 0 ? $"+{ps.TimeExtensionPercent}%" : "—",
+                        ps.TotalMinutesAllowed, ps.TotalMinutesUsed, ps.MinutesRemaining, ps.PercentUsed);
+                    if (ps.MinutesRemaining < 0) _studentsGrid.Rows[idx].Cells["remaining"].Style.ForeColor = Theme.Danger;
+                }
             }
             catch (Exception ex)
             {

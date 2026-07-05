@@ -1,7 +1,9 @@
 /**
  * AttendanceEntryForm — enter/edit minutes_present per student for a session.
- * The "Mins This Session" column is editable; live warnings are shown if an
- * entry exceeds the session duration or the student's total allowed time.
+ * The "Mins This Session" column is editable; live warnings and a % Used
+ * progress bar (green &lt;80%, amber 80-99%, red &gt;=100%) update as the
+ * value is typed, reflecting the minutes for *this* session on top of the
+ * student's prior usage.
  *
  * © 2026 Exeter College — Creative Commons NC-BY-SA 4.0
  */
@@ -28,6 +30,7 @@ namespace OSPTracker.Forms
 
         private const int ColMinutes = 5;
         private const int ColWarning = 6;
+        private const int ColPercent = 7;
 
         public AttendanceEntryForm(int projectId, int sessionId)
         {
@@ -65,6 +68,7 @@ namespace OSPTracker.Forms
                 RowHeadersVisible = false,
                 SelectionMode = DataGridViewSelectionMode.CellSelect, MultiSelect = false,
                 AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                BackgroundColor = Color.White,
                 ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
                 {
                     BackColor = Theme.Primary, ForeColor = Color.White,
@@ -80,8 +84,17 @@ namespace OSPTracker.Forms
             _grid.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Remaining", Name = "remaining", ReadOnly = true, FillWeight = 1f });
             _grid.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Mins This Session", Name = "minutes", ReadOnly = false, FillWeight = 1.1f });
             _grid.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Warnings", Name = "warning", ReadOnly = true, FillWeight = 1.6f });
+            _grid.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "% Used", Name = "pct", ReadOnly = true, FillWeight = 1f });
+            // Belt-and-braces: only the minutes column may ever enter edit mode, regardless
+            // of per-column ReadOnly state — this is the actual authoritative gate.
+            _grid.CellBeginEdit += (s, e) => { if (e.ColumnIndex != ColMinutes) e.Cancel = true; };
             _grid.CellValueChanged += (s, e) => { if (e.RowIndex >= 0 && e.ColumnIndex == ColMinutes) UpdateWarningsForRow(_grid.Rows[e.RowIndex]); };
             _grid.CurrentCellDirtyStateChanged += (s, e) => { if (_grid.IsCurrentCellDirty) _grid.CommitEdit(DataGridViewDataErrorContexts.Commit); };
+            _grid.CellPainting += (s, e) =>
+            {
+                if (e.RowIndex >= 0 && e.Value != null && e.ColumnIndex == ColPercent)
+                    ProgressCellRenderer.Paint(e, Convert.ToInt32(e.Value));
+            };
 
             Controls.Add(_grid);
             Controls.Add(footer);
@@ -109,7 +122,7 @@ namespace OSPTracker.Forms
                     int idx = _grid.Rows.Add(
                         s.CandidateNumber, $"{s.Surname}, {s.FirstName}",
                         s.TotalMinutesAllowed, s.TotalMinutesUsed - s.MinutesPresent, s.MinutesRemaining,
-                        s.MinutesPresent, "");
+                        s.MinutesPresent, "", 0);
                     var row = _grid.Rows[idx];
                     row.Tag = s;
                     UpdateWarningsForRow(row);
@@ -138,6 +151,10 @@ namespace OSPTracker.Forms
             if (overAllowed) warnings.Add("Would exceed total allowed time");
             row.Cells[ColWarning].Value = string.Join("; ", warnings);
             row.Cells[ColWarning].Style.ForeColor = warnings.Count > 0 ? Theme.Danger : Color.Black;
+
+            // Live percentage — reflects the minutes typed for *this* session, not just past sessions.
+            int percent = s.TotalMinutesAllowed > 0 ? (int)Math.Round(100.0 * wouldTotal / s.TotalMinutesAllowed) : 0;
+            row.Cells[ColPercent].Value = percent;
         }
 
         private static int ParseMinutes(string val)

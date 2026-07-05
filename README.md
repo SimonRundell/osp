@@ -1,6 +1,6 @@
 # OSP Hours Tracker
 
-**Version 0.0.0.2**
+**Version 0.0.0.3**
 
 A Windows desktop application for recording and reporting student time spent on Open-Supervised Projects (OSPs) — timed examination tasks typically 30 hours in total, taken under supervised conditions with individual access arrangements (extra time, rest breaks).
 
@@ -27,7 +27,8 @@ Built by Simon Rundell, CodeMonkey Design Ltd. for Exeter College.
 13. [Reporting & Export](#reporting--export)
 14. [Security Notes](#security-notes)
 15. [Deployment](#deployment)
-16. [License](#license)
+16. [Changelog](#changelog)
+17. [License](#license)
 
 ---
 
@@ -39,7 +40,7 @@ The OSP Hours Tracker lets teaching and exam staff:
 - Enrol students onto projects with individual access arrangements — extra time (+10%, +20%, +25%) and/or a rest-breaks flag.
 - Record supervised sessions, either whole-class or one-to-one catch-up sessions.
 - Enter per-student attendance in minutes for each session, with live warnings if an entry would exceed the session length or the student's total allowance.
-- See running totals at a glance — minutes used, minutes remaining, percentage consumed — both on-screen and on a printable report.
+- See running totals at a glance — minutes used, minutes remaining, percentage consumed via a colour-coded progress bar (green under 80%, amber 80-99%, red 100%+) — consistently on the Project Detail screen, the Attendance Entry screen (updating live as minutes are typed), the Session List screen, and the printed/exported report.
 - Generate a professional per-project report: print to PDF, or export to CSV or Excel.
 - Bulk-import students from a CSV spreadsheet.
 - Manage staff accounts (admin) with temporary-password creation and reset, automatically copied to the clipboard ready to paste into an email.
@@ -106,8 +107,9 @@ OSP/
 │   ├── ApiService.cs           HTTP client wrapper, Bearer-token auth
 │   └── AppConfig.cs            Loads config.json
 ├── Utils/
-│   ├── Theme.cs                 Shared colour palette / fonts
-│   └── CsvParser.cs             RFC 4180-ish CSV tokenizer for student import
+│   ├── Theme.cs                   Shared colour palette / fonts
+│   ├── CsvParser.cs               RFC 4180-ish CSV tokenizer for student import
+│   └── ProgressCellRenderer.cs    Shared % Used progress-bar painter for DataGridView cells
 │
 ├── data/
 │   └── schema.sql              Full MySQL schema, views
@@ -377,11 +379,11 @@ All endpoints live under the served `osp/` folder and return JSON in the shape `
 | `MainForm`              | Shell with Dashboard / Projects / Admin tabs, menu, status bar          |
 | `DashboardPanel`        | Project cards — student count, base allowance, unscheduled time remaining |
 | `ProjectsPanel`         | Browse-all-projects table with links to Detail/Sessions/Report         |
-| `ProjectDetailForm`     | Project info, enrolled students, enrol/edit/remove enrolment            |
-| `SessionListForm`       | Sessions for a project; scheduled-time and remaining-time footer        |
+| `ProjectDetailForm`     | Project info, enrolled students (with % Used progress bar), enrol/edit/remove enrolment |
+| `SessionListForm`       | Sessions for a project; scheduled-time and remaining-time footer, plus an Enrolled Students time-used panel with progress bars |
 | `SessionFormDialog`     | Create or edit a session                                                |
-| `AttendanceEntryForm`   | Per-student minutes entry with live over-time warnings                  |
-| `ReportForm`            | Print-ready report: Project Summary / Session Log / Student Summary     |
+| `AttendanceEntryForm`   | Per-student minutes entry with live over-time warnings and a live % Used progress bar |
+| `ReportForm`            | Print-ready report: Project Summary / Session Log / Student Summary (with % Used progress bars) |
 | `AdminTabPanel`         | Staff / Students / Projects management, admin only                     |
 | `StaffPanel` / `StaffEditDialog` | Staff CRUD, password reset (clipboard-copies temp passwords)   |
 | `StudentsPanel` / `StudentEditDialog` / `StudentImportDialog` | Student CRUD + CSV bulk import |
@@ -423,6 +425,23 @@ For a real (non-development) deployment:
 - [ ] HTTPS is configured — JWTs are sent on every request and should never travel in the clear.
 - [ ] The first admin account's temporary password has been changed.
 - [ ] `dotnet publish` the desktop client (e.g. `dotnet publish -c Release -r win-x64 --self-contained false`) and distribute the output folder alongside a `config.json` pointing at the production API URL.
+
+---
+
+## Changelog
+
+### 0.0.0.3
+
+- Added a colour-coded % Used progress bar (green under 80%, amber 80-99%, red 100%+), consistent across the Project Detail screen, the Attendance Entry screen (recalculates live as minutes are typed), a new Session List time-used panel, and the printed/exported report — shared via `Utils/ProgressCellRenderer.cs` for the grid views and matching CSS for the HTML report.
+- Session List screen gained a resizable "Enrolled Students — Time Used" panel below the sessions grid, so time usage is visible without switching to Project Detail.
+- Attendance Entry's Warnings column is now hard-locked against accidental editing (`CellBeginEdit` guard), and the grid's background colour was fixed to match the rest of the app.
+
+### 0.0.0.2
+
+- Added CSV bulk student import (**Admin → Students → Import CSV...**), with flexible column-header matching and a validation preview — rows missing required fields are flagged and excluded before anything reaches the server; an existing candidate number is updated rather than duplicated.
+- Staff temporary passwords (new account creation and password reset) are now copied to the clipboard automatically, ready to paste into an email.
+- Fixed a WinForms lifecycle bug where logging out could silently close the entire application, rather than returning to the login screen.
+- Fixed a bug where a failed login attempt was incorrectly reported as "Session expired" instead of the actual reason (e.g. wrong password).
 
 ---
 

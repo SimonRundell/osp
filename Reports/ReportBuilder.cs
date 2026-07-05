@@ -28,6 +28,13 @@ namespace OSPTracker.Reports
             tfoot td { font-weight: bold; border-top: 2px solid #999; }
             .danger { color: #c0392b; font-weight: bold; }
             .foot   { margin-top: 20px; font-size: 10px; color: #888; }
+            .progress-track { background: #e2e2e2; border-radius: 3px; height: 11px; width: 70px;
+                               display: inline-block; vertical-align: middle; overflow: hidden; }
+            .progress-bar   { height: 11px; float: left; }
+            .progress-bar.success { background: #27ae60; }
+            .progress-bar.accent  { background: #e67e22; }
+            .progress-bar.danger  { background: #c0392b; }
+            .pct-label { display: inline-block; margin-left: 6px; vertical-align: middle; white-space: nowrap; }
             @media print { body { margin: 8mm; } @page { size: A4 landscape; } }
         ";
 
@@ -77,7 +84,7 @@ namespace OSPTracker.Reports
                 sb.Append($"<td>{Enc(st.CandidateNumber)}</td><td>{Enc(st.CisRef ?? "—")}</td><td>{Enc(st.Surname)}</td><td>{Enc(st.FirstName)}</td>");
                 sb.Append($"<td>{(st.TimeExtensionPercent > 0 ? "+" + st.TimeExtensionPercent + "%" : "—")}</td>");
                 sb.Append($"<td>{(st.RestBreaks == 1 ? "Yes" : "—")}</td>");
-                sb.Append($"<td>{st.TotalMinutesAllowed}</td><td>{st.TotalMinutesUsed}</td><td{remStuCls}>{st.MinutesRemaining}</td><td>{st.PercentUsed}%</td>");
+                sb.Append($"<td>{st.TotalMinutesAllowed}</td><td>{st.TotalMinutesUsed}</td><td{remStuCls}>{st.MinutesRemaining}</td><td>{ProgressBarHtml(st.PercentUsed)}</td>");
                 foreach (var s in data.Sessions) sb.Append($"<td style='text-align:right'>{st.MinutesFor(s.SessionNumber)}</td>");
                 sb.Append("</tr>");
             }
@@ -86,6 +93,15 @@ namespace OSPTracker.Reports
             sb.Append("<p class='foot'>OSP Hours Tracker &mdash; © 2026 Exeter College &mdash; Creative Commons NC-BY-SA 4.0</p>");
             sb.Append("</body></html>");
             return sb.ToString();
+        }
+
+        /// <summary>Renders a percent-used progress bar (green &lt;80%, amber 80-99%, red &gt;=100%), matching AttendanceEntryForm/ProjectDetailForm's colour thresholds.</summary>
+        private static string ProgressBarHtml(int percent)
+        {
+            string cls = percent >= 100 ? "danger" : percent >= 80 ? "accent" : "success";
+            int barWidth = System.Math.Max(0, System.Math.Min(percent, 100));
+            return $"<div class='progress-track'><div class='progress-bar {cls}' style='width:{barWidth}%'></div></div>" +
+                   $"<span class='pct-label'>{percent}%</span>";
         }
 
         private static string Enc(string s) => System.Net.WebUtility.HtmlEncode(s ?? "");

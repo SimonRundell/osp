@@ -92,6 +92,11 @@ namespace OSPTracker.Forms
                 _grid.Columns.Add(new DataGridViewButtonColumn { HeaderText = "", Name = "remove", Text = "Remove", UseColumnTextForButtonValue = true, FillWeight = 0.7f });
             }
             _grid.CellClick += Grid_CellClick;
+            _grid.CellPainting += (s, e) =>
+            {
+                if (e.RowIndex >= 0 && e.Value != null && _grid.Columns[e.ColumnIndex].Name == "pct")
+                    ProgressCellRenderer.Paint(e, Convert.ToInt32(e.Value));
+            };
 
             Controls.Add(_grid);
             Controls.Add(_lblError);
@@ -198,7 +203,7 @@ namespace OSPTracker.Forms
                         ps.TimeExtensionPercent > 0 ? $"+{ps.TimeExtensionPercent}%" : "—",
                         ps.RestBreaks == 1 ? "Yes" : "—",
                         ps.TotalMinutesAllowed, ps.TotalMinutesUsed, ps.MinutesRemaining,
-                        $"{ps.PercentUsed}%",
+                        ps.PercentUsed,
                     };
                     if (IsAdmin) values.AddRange(new object[] { "Edit", "Remove" });
 

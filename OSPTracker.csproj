@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -12,9 +12,9 @@
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <StartupObject>OSPTracker.Program</StartupObject>
     <ApplicationIcon>osptracker.ico</ApplicationIcon>
-    <Version>0.0.0.2</Version>
-    <AssemblyVersion>0.0.0.2</AssemblyVersion>
-    <FileVersion>0.0.0.2</FileVersion>
+    <Version>0.0.0.3</Version>
+    <AssemblyVersion>0.0.0.3</AssemblyVersion>
+    <FileVersion>0.0.0.3</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
