@@ -1,0 +1,13 @@
+{
+  "db": {
+    "host": "localhost",
+    "name": "u240325118_osp",
+    "user": "u240325118_osp",
+    "pass": "f3oHCjb7"
+  },
+  "jwt": {
+    "secret": "ziggyplayedguitarjamminggoodwithweirdandgilly",
+    "accessExpiry": 28800
+  },
+  "centre_number": "54221"
+}

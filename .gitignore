@@ -12,6 +12,7 @@ obj/
 osp/.config.json
 osp/live.config.json
 osp/server.log
+config.json
 
 # Rider
 .idea/
